@@ -1,8 +1,8 @@
 class Dom {
   constructor(selector) {
     this.$el = typeof selector === 'string'
-    ? document.querySelector(selector)
-    : selector
+      ? document.querySelector(selector)
+      : selector
   }
 
   html(html) {
@@ -11,6 +11,22 @@ class Dom {
       return this
     }
     return this.$el.outerHTML.trim()
+  }
+
+  text(text) {
+    if (typeof text === 'string') {
+      if (this.$el.tagName.toLowerCase() === 'input') {
+        this.$el.value = text
+      } else {
+        this.$el.textContent = text
+      }
+      return this
+    }
+    if (this.$el.tagName.toLowerCase() === 'input') {
+      return this.$el.value.trim()
+    }
+
+    return this.$el.textContent.trim()
   }
 
   clear() {
@@ -24,6 +40,10 @@ class Dom {
 
   off(eventType, callback) {
     this.$el.removeEventListener(eventType, callback)
+  }
+
+  find(selector) {
+    return $(this.$el.querySelector(selector))
   }
 
   append(node) {
@@ -57,13 +77,42 @@ class Dom {
   }
 
   css(styles = {}) {
-    Object.assign(this.$el.style, styles)
-    return this.$el
+    Object
+        .keys(styles)
+        .forEach(key => {
+          this.$el.style[key] = styles[key]
+        })
+  }
+
+  id(parse) {
+    if (parse) {
+      const parsed = this.id().split(':')
+      return {
+        row: +parsed[0],
+        col: +parsed[1]
+      }
+    }
+    return this.data.id
+  }
+
+  focus() {
+    this.$el.focus()
+    return this
+  }
+
+  addClass(className) {
+    this.$el.classList.add(className)
+    return this
+  }
+
+  removeClass(className) {
+    this.$el.classList.remove(className)
+    return this
   }
 }
 
 export function $(selector) {
-  return new Dom(selector);
+  return new Dom(selector)
 }
 
 $.create = (tagName, classes = '') => {
@@ -71,5 +120,5 @@ $.create = (tagName, classes = '') => {
   if (classes) {
     el.classList.add(classes)
   }
-  return el
+  return $(el)
 }
