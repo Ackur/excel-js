@@ -1,3 +1,4 @@
+import { Loader } from '../../components/Loader.js';
 import {$} from '../dom.js';
 import { ActiveRoute } from './ActiveRoute';
 
@@ -10,6 +11,7 @@ export class Router {
     this.$placeholder = $(selector);
     this.routes = routes;
     this.page = null
+    this.loader = Loader
 
     this.changePageHandler = this.changePageHandler.bind(this);
 
@@ -21,7 +23,7 @@ export class Router {
     this.changePageHandler();
   }
 
-  changePageHandler() {
+  async changePageHandler() {
     if (this.page) {
       this.page.destroy()
     }
@@ -34,14 +36,15 @@ export class Router {
       }
     })
 
-    this.$placeholder.clear()
+    this.$placeholder.clear().append(this.loader())
 
     if (Page) {
       this.page = new Page(ActiveRoute.param)
-      this.$placeholder.append(this.page.getRoot())
+      const root = await this.page.getRoot()
+      this.$placeholder.clear().append(root)
       this.page.afterRender()
     } else {
-      this.$placeholder.append(`404 - Ooops`)
+      this.$placeholder.clear().append(`404 - Ooops`)
     }
   }
 
